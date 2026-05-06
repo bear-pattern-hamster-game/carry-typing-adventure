@@ -2,7 +2,8 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <title>キャリーのタイピング大冒険</title>
 <link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=M+PLUS+Rounded+1c:wght@700;800&display=swap" rel="stylesheet">
 <style>
@@ -563,6 +564,11 @@ html, body {
 .eit-typed .ng  { color:#cc2244; }
 
 body { cursor: none; }
+/* タッチ端末ではカスタムカーソルを無効化 */
+@media (hover: none) and (pointer: coarse) {
+  body { cursor: auto; }
+  #cursor { display: none !important; }
+}
 #cursor {
   position: fixed; z-index: 9999; pointer-events: none;
   width: 12px; height: 12px;
@@ -804,7 +810,6 @@ body { cursor: none; }
 
 /* Home button */
 #btnHome {
-  margin-left: auto;
   background: var(--panel2);
   border: 2px solid var(--border);
   color: var(--text);
@@ -814,6 +819,7 @@ body { cursor: none; }
   cursor: pointer;
   transition: border-color .15s, color .15s, transform .1s, box-shadow .1s;
   box-shadow: 2px 2px 0 #00000044;
+  border-radius: 4px;
 }
 #btnHome:hover { border-color: var(--amber); color: var(--amber); transform: translate(-1px,-1px); box-shadow: 3px 3px 0 #00000044; }
 #btnHome:active { transform: translate(1px,1px); box-shadow: 1px 1px 0 #00000044; }
@@ -940,6 +946,16 @@ body { cursor: none; }
   line-height: 1.6;
   text-align: center;
   white-space: nowrap;
+}
+/* スマホでは折り返しを許可してはみ出し防止 */
+@media (max-width: 520px) {
+  #speech {
+    white-space: normal;
+    font-size: .85rem;
+    padding: 8px 14px;
+    max-width: calc(100vw - 16px);
+    border-radius: 16px;
+  }
 }
 #speech.show {
   opacity: 1;
@@ -1569,12 +1585,242 @@ body { cursor: none; }
 /* ============================
    RESPONSIVE
    ============================ */
+/* ============================
+   MOBILE RESPONSIVE
+   ============================ */
+
+/* スクロール可能な全画面に -webkit-overflow-scrolling を付与 */
+.screen[style*="overflow-y:auto"],
+.screen[style*="overflow-y: auto"],
+#hqTopScreen, #hqQuizScreen, #hqResultScreen, #hqBonusScreen,
+#kanjiScreen, #quizScreen, #eiScreen, #practiceScreen,
+#titleScreen, #howScreen {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+/* スマホ：HUDを2段構成にしてホームボタンを常に表示 */
 @media (max-width: 520px) {
   .px-card { padding: 20px 18px; }
-  #typingPanel { font-size: .9em; }
-  .ch { width: 18px; height: 24px; font-size: .85rem; }
-  #hud { gap: 6px; padding: 0 8px; }
-  .hud-chip { padding: 4px 8px; }
+
+  /* タイピング文字サイズを維持（PCスケールに近づける） */
+  #typingPanel { font-size: 1em; }
+  .ch { width: 28px; height: 38px; font-size: 1.4rem; }
+
+  /* HUDを2行ラップ対応に */
+  #hud {
+    height: auto;
+    flex-wrap: wrap;
+    padding: 6px 8px 4px;
+    gap: 4px;
+    align-items: center;
+  }
+  .hud-chip { padding: 4px 9px; font-size: .75rem; flex-shrink: 0; }
+  .hud-chip .val { font-size: .9rem; }
+
+  /* サウンドボタン・ホームボタン：右端に固定されてはみ出さないように */
+  #btnSound {
+    padding: 4px 8px !important;
+    font-size: .82rem !important;
+  }
+  #btnHome {
+    padding: 4px 10px;
+    font-size: .72rem;
+  }
+
+  /* wordRowのスクロール対応 */
+  #wordDisplay {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+
+  /* タイピングパネル下部の余白を確保 */
+  #typingPanel { padding-bottom: env(safe-area-inset-bottom, 0px); }
+
+  /* モーダルのボタンをタップしやすく */
+  .btn { min-height: 44px; }
+
+  /* hqTopScreen のスクロールをスマホで確実に有効化 */
+  #hqTopScreen {
+    overflow-y: scroll !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior-y: contain;
+    touch-action: pan-y !important;
+  }
+  /* 星フィールドがタッチを奪わないように */
+  #hqStarField {
+    pointer-events: none !important;
+    touch-action: none !important;
+  }
+  /* 歴史クイズ：単元ボタングリッドをスマホで2列・幅100% */
+  #hqTopScreen [style*="grid-template-columns: 1fr 1fr 1fr"],
+  #hqTopScreen [style*="grid-template-columns:1fr 1fr 1fr"] {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 6px !important;
+    max-width: 100% !important;
+    padding: 0 !important;
+  }
+  /* 単元ボタンのテキストサイズをスマホで調整 */
+  #hqTopScreen button[onclick^="hqStartQuiz"] {
+    font-size: .65rem !important;
+    padding: 7px 4px !important;
+    line-height: 1.3 !important;
+  }
+  /* タイトルや説明文もコンパクトに */
+  #hqTopScreen [style*="font-size:1.7rem"] { font-size: 1.3rem !important; }
+  #hqTopScreen [style*="font-size:.8rem"] { font-size: .72rem !important; line-height: 1.5 !important; }
+  /* 横幅が画面からはみ出さないように */
+  #hqTopScreen > div { width: 100% !important; max-width: 100% !important; box-sizing: border-box !important; }
+  /* その他スクロール可能画面すべてに touch-action を付与 */
+  #quizScreen, #kanjiScreen, #eiScreen, #howScreen, #titleScreen,
+  #hqQuizScreen, #hqResultScreen, #hqBonusScreen {
+    touch-action: pan-y !important;
+  }
+
+  /* ===== 英語例文・英単語クイズ：横はみ出し修正 ===== */
+
+  /* ===== 練習モード：レベルタブの横はみ出し修正 ===== */
+  #practiceScreen { overflow-x: hidden !important; }
+  #practiceTopBar {
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+  }
+  /* キャラとタイトルを縮小 */
+  #practiceTopBar canvas { width: 44px !important; height: auto !important; }
+  .practice-title-text h2 { font-size: .85rem !important; }
+  .practice-title-text p  { font-size: .58rem !important; }
+  /* レベルタブを折り返し */
+  #practiceLevelTabs {
+    flex-wrap: wrap !important;
+    gap: 4px !important;
+    width: 100% !important;
+  }
+  .ptab {
+    font-size: .6rem !important;
+    padding: 5px 10px !important;
+    flex: 1 1 auto !important;
+    text-align: center !important;
+  }
+  #eiScreen  { overflow-x: hidden !important; }
+  #quizScreen { overflow-x: hidden !important; }
+  #eiInner   { padding-left: 8px !important; padding-right: 8px !important; box-sizing: border-box !important; width: 100% !important; }
+  #quizInner { padding-left: 8px !important; padding-right: 8px !important; box-sizing: border-box !important; width: 100% !important; }
+
+  /* ── 英語例文 eiScreen ── */
+  /* グリッドを縦1列 */
+  #eiMain { grid-template-columns: 1fr !important; }
+  /* トップバー */
+  #eiTopBar { padding: 8px 8px !important; gap: 6px !important; overflow: hidden; flex-wrap: wrap !important; }
+  /* テーマタブをスクロール可能に（wrap済みだが念のため） */
+  #eiThemeTabs { flex-wrap: wrap !important; gap: 4px !important; }
+  #eiThemeTabs .ptab { font-size: .62rem !important; padding: 3px 8px !important; }
+  /* カード */
+  #eiCard { padding: 10px 8px !important; gap: 8px !important; }
+  /* 日本語訳 */
+  #eiJa {
+    font-size: .88rem !important;
+    white-space: normal !important;
+    word-break: break-word !important;
+    overflow-wrap: break-word !important;
+  }
+  /* 英文表示エリア */
+  #eiEnDisplay {
+    font-size: .95rem !important;
+    white-space: normal !important;
+    word-break: break-word !important;
+    overflow-wrap: break-word !important;
+    line-height: 1.7 !important;
+    letter-spacing: .02em !important;
+  }
+  /* タイピング表示：横スクロール可能・nowrap解除 */
+  #eiTypingDisplay {
+    flex-wrap: wrap !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    justify-content: flex-start !important;
+    padding: 8px 10px !important;
+    min-height: 44px !important;
+    gap: 3px !important;
+  }
+  /* ヒント・フィードバック */
+  #eiKeyHint { font-size: .65rem !important; }
+  #eiKeyHint b { white-space: nowrap; }
+
+  /* スコアボード */
+  #eiScoreBoard { gap: 4px !important; }
+  /* ログ・単語統計の高さを縮小 */
+  #eiLog      { max-height: 140px !important; }
+  #eiWordStats { max-height: 140px !important; }
+  /* 進捗テキスト */
+  #eiProgressOuter { font-size: .65rem !important; }
+
+  /* ── 英単語クイズ quizScreen ── */
+  #quizTopBar { padding: 8px !important; flex-wrap: wrap !important; }
+  #quizGradeTabs { flex-wrap: wrap !important; }
+  #quizCard { padding: 14px 10px !important; }
+  #quizWordJa { font-size: 1.1rem !important; }
+  /* 選択肢：1列 */
+  #quizChoices {
+    grid-template-columns: 1fr !important;
+    gap: 6px !important;
+  }
+  .quiz-choice {
+    font-size: .9rem !important;
+    padding: 11px 10px 11px 34px !important;
+    line-height: 1.4 !important;
+  }
+  /* タイピング入力 */
+  #quizTypingDisplay {
+    flex-wrap: wrap !important;
+    overflow-x: auto !important;
+    justify-content: flex-start !important;
+    padding: 8px 10px !important;
+  }
+  /* quizScreen内コンテナ */
+  #quizScreen > div { max-width: 100% !important; box-sizing: border-box !important; }
+
+  /* ===== タイトル画面：スマホ完全対応 ===== */
+  #titleScreen {
+    overflow-y: auto !important;
+    justify-content: flex-start !important;
+  }
+  /* ピクセルアートを小さく（上部に表示） */
+  #titleCharWrap canvas { width: 72px !important; }
+  /* タイトルロゴを縮小 */
+  .title-logo { font-size: clamp(.95rem, 4.5vw, 1.3rem) !important; }
+  /* px-card内のレイアウト：縦1列 */
+  #titleInner {
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 8px !important;
+  }
+  /* 書影バナーをスマホで小さく中央寄せ */
+  #bookBanner {
+    margin: 0 auto !important;
+    margin-left: 0 !important;
+    transform: scale(0.65) !important;
+    transform-origin: top center !important;
+    height: 120px !important;
+  }
+  /* ボタンを画面幅いっぱいに */
+  #titleInner > div:last-child { width: 100% !important; }
+  #titleInner .btn {
+    width: 100% !important;
+    max-width: 360px !important;
+    font-size: .88rem !important;
+    padding: 11px 10px !important;
+  }
+  /* px-cardをコンパクトに */
+  #titleScreen .px-card {
+    padding: 6px 10px !important;
+    width: calc(100% - 16px) !important;
+  }
+  /* 外部バナーをコンパクトに */
+  #titleScreen [style*="max-width:580px"] {
+    max-width: calc(100% - 16px) !important;
+  }
 }
 
 /* ============================
@@ -2021,6 +2267,95 @@ body { cursor: none; }
 .hq-log-item { font-family:'M PLUS Rounded 1c',sans-serif; font-size:.72rem; padding:3px 8px; border-radius:6px; display:flex; gap:6px; align-items:center; }
 .hq-log-item.ok { color:var(--green); background:rgba(61,236,168,.06); }
 .hq-log-item.ng { color:var(--red);   background:rgba(255,85,119,.06); }
+/* ============================
+   スマホ仮想キーボード（全画面共通）
+   ============================ */
+
+/* 仮想キーボード表示中、タイピングパネルが隠れないようにする */
+/* (bottom位置はJSで直接 typingPanel.style.bottom を設定) */
+body { --mkbd-h: 0px; }
+
+/* タイピングパネルのtransitionだけCSS側に残す */
+#typingPanel {
+  transition: bottom .12s ease;
+}
+
+/* スマホでは練習モードのinputを完全に非表示 */
+@media (hover: none) and (pointer: coarse) {
+  #practiceInputWrap { display: none !important; }
+  #kbArea { display: none !important; }
+  #practiceMain { grid-template-columns: 1fr !important; }
+  #practiceScreen { overflow-y: auto; }
+  #practicePanel  { width: 100% !important; height: 100%; }
+  #practiceInner  { height: auto !important; overflow: visible !important; }
+  #quizTypingInputWrap { display: none !important; }
+  #kanjiTypingInputWrap { display: none !important; }
+}
+
+/* 仮想KBD収納状態：キー行を隠してバーだけ残す */
+#mobileKbd.mkbd-collapsed .mkbd-row { display: none !important; }
+#mobileKbd.mkbd-collapsed {
+  padding-top: 2px;
+  padding-bottom: calc(4px + env(safe-area-inset-bottom, 0px));
+  gap: 0;
+}
+
+#mobileKbd {
+  display: none; /* JSで直接制御 */
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  z-index: 9001;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px 4px calc(6px + env(safe-area-inset-bottom, 0px));
+  background: rgba(8,12,30,.97);
+  border-top: 2px solid rgba(74,96,192,.5);
+  box-shadow: 0 -4px 20px rgba(0,0,0,.5);
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+#mobileKbd.mkbd-visible { display: flex; }
+
+.mkbd-row {
+  display: flex;
+  gap: 3px;
+  justify-content: center;
+}
+.mkbd-key {
+  background: rgba(28,40,80,.95);
+  border: 1.5px solid rgba(74,96,192,.55);
+  color: #D8E8FF;
+  border-radius: 7px;
+  font-family: 'M PLUS Rounded 1c', sans-serif;
+  font-size: .82rem;
+  font-weight: 700;
+  min-width: 0;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex: 1;
+  transition: background .07s;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  box-shadow: 0 2px 0 rgba(0,0,0,.5);
+  letter-spacing: 0;
+}
+.mkbd-key:active, .mkbd-key.mkbd-pressed {
+  background: rgba(74,96,192,.7);
+  box-shadow: none;
+  transform: translateY(1px);
+}
+.mkbd-key.mkbd-hint-key {
+  border-color: rgba(255,212,67,.7);
+  color: var(--amber);
+  background: rgba(255,212,67,.1);
+}
+.mkbd-key.mkbd-wide   { flex: 1.4; font-size: .72rem; }
+.mkbd-key.mkbd-xwide  { flex: 3.5; }
+.mkbd-key.mkbd-bs     { flex: 1.4; font-size: .78rem; color: #FF8888; border-color: rgba(255,100,100,.4); }
 @media print {
   body { background:#fff !important; overflow:auto !important; }
   #hqBonusScreen { background:#fff !important; height:auto !important; overflow:visible !important; }
@@ -2029,6 +2364,7 @@ body { cursor: none; }
   .hq-bonus-table th { background:#eee !important; color:#000 !important; border-color:#999 !important; }
   .hq-bonus-table td { color:#000 !important; border-color:#ccc !important; }
   * { color:#000 !important; text-shadow:none !important; box-shadow:none !important; }
+  #mobileKbd { display:none !important; }
 }
 </style>
 
@@ -2053,14 +2389,14 @@ body { cursor: none; }
 
 <!-- ======== TITLE ======== -->
 <div class="screen" id="titleScreen">
-  <div style="width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:6px 0 10px;min-height:100%;">
+  <div style="width:100%;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:10px 0 20px;min-height:100%;box-sizing:border-box;">
   <div id="titleCharWrap"><canvas id="titleCanvas" width="136" height="192" style="width:100px;height:auto;"></canvas></div>
   <div class="title-logo">🐹 キャリーのタイピング大冒険</div>
   <div class="title-sub">CARRY'S TYPING ADVENTURE</div>
   <div id="titleHiScore">ハイスコア <b id="hiScoreVal">0</b></div>
-  <div class="px-card" style="padding:8px 14px; max-width:580px;">
-    <div style="display:flex; gap:14px; align-items:center; justify-content:center;">
-      <!-- 書影バナー（少し左寄せ） -->
+  <div class="px-card" style="padding:8px 14px; max-width:580px; width:100%; box-sizing:border-box;">
+    <div id="titleInner" style="display:flex; gap:14px; align-items:flex-start; justify-content:center;">
+      <!-- 書影バナー（PC用：横に表示） -->
       <div id="bookBanner" style="position:relative;display:inline-block;margin-top:16px;flex-shrink:0;margin-left:-10px;">
         <!-- 吹き出し（小さめ） -->
         <div style="
@@ -2315,11 +2651,15 @@ body { cursor: none; }
       <span class="val" id="hudTimerNum">60</span>
     </div>
     <div class="hud-chip"><span class="lbl">Ep.</span><span class="val" id="hudEp">1</span><span class="lbl" id="hudEpTotal">/38</span></div>
-    <button id="btnSound" onclick="toggleSound()" title="サウンド切替" style="
-  background:rgba(22,33,62,.85);border:1.5px solid var(--border2);color:var(--text);
-  padding:5px 10px;font-family:var(--pixel);font-size:.85rem;cursor:pointer;
-  border-radius:20px;backdrop-filter:blur(8px);box-shadow:0 2px 8px rgba(0,0,0,.3);">🔊</button>
-<button id="btnHome" onclick="confirmHome()">🏠 ホーム</button>
+    <!-- サウンド＋ホームをまとめて右端に -->
+    <div style="margin-left:auto;display:flex;gap:5px;align-items:center;flex-shrink:0;">
+      <button id="btnSound" onclick="toggleSound()" title="サウンド切替" style="
+        background:rgba(22,33,62,.85);border:1.5px solid var(--border2);color:var(--text);
+        padding:5px 10px;font-family:var(--pixel);font-size:.85rem;cursor:pointer;
+        border-radius:20px;backdrop-filter:blur(8px);box-shadow:0 2px 8px rgba(0,0,0,.3);
+        white-space:nowrap;">🔊</button>
+      <button id="btnHome" onclick="confirmHome()" style="white-space:nowrap;">🏠 ホーム</button>
+    </div>
   </div>
 
   <!-- Typing panel -->
@@ -4058,16 +4398,45 @@ document.addEventListener('keydown', e => {
   if (!gs || gs.classList.contains('hidden')) return;
   const modals = ['clearScreen','gameoverScreen','allClearScreen','homeConfirmScreen'];
   if (modals.some(id => { const m = document.getElementById(id); return m && !m.classList.contains('hidden'); })) return;
-  if (e.keyCode === 229) return;
+
   if (e.ctrlKey || e.altKey || e.metaKey) return;
   if (e.key === 'Enter') return;
+
+  // スペースキーを最優先処理
+  if (e.key === ' ' || e.code === 'Space') {
+    e.preventDefault();
+    _romaBuf = ''; processTypedChar(' '); return;
+  }
+
+  // IME変換中（229）をスキップ。ただし e.key が1文字のアルファベットなら仮想KBDからのイベントとして処理
+  if (e.keyCode === 229) {
+    // 仮想KBDからdispatchされたa-zキーは e.key が正しく設定される
+    if (e.key && e.key.length === 1 && /^[a-z-]$/i.test(e.key)) {
+      // 仮想KBDのキーとして処理する
+    } else {
+      return;
+    }
+  }
+
+  // e.key が1文字のa-zなら直接処理（仮想KBD対応）
+  if (e.key && e.key.length === 1 && /^[a-z]$/i.test(e.key)) {
+    e.preventDefault();
+    if (e.key.toLowerCase() === '-') {
+      const ep2 = EPISODES[G.ep];
+      const text2 = ep2 && ep2.text || '';
+      let idx2 = G.charIdx;
+      while (idx2 < text2.length && _isSkipChar(text2[idx2])) idx2++;
+      if (text2[idx2] === 'ー') { _romaBuf = ''; processTypedChar('ー'); return; }
+    }
+    _romajiInput(e.key.toLowerCase());
+    return;
+  }
 
   const key = _codeToKey(e.code, e.shiftKey);
   if (!key) return;
   e.preventDefault();
 
   if (key === ' ') { _romaBuf = ''; processTypedChar(' '); return; }
-  // Minusキー（-）で長音符（ー）を入力できるようにする
   if (key === '-') {
     const ep = EPISODES[G.ep];
     const text = ep && ep.text || '';
@@ -4172,20 +4541,40 @@ function showSpeech(msg) {
   const el = document.getElementById('speech');
   el.textContent = '🐹「'+msg+'」';
 
-  // 垂直位置: タイピングパネルの上端 → そこからキャラ高さ(144px) + 余白(20px) 上
+  // タイピングパネル上端を取得
   const panel    = document.getElementById('typingPanel');
   const panelTop = panel ? panel.getBoundingClientRect().top : window.innerHeight * 0.65;
   const charH    = 144; // charCanvasの高さ
-  const bubbleBottom = window.innerHeight - panelTop + charH + 28;
-  el.style.bottom = bubbleBottom + 'px';
+
+  // スマホ判定（HUDが2段になって高さが変わるため）
+  const isMobile = window.innerWidth <= 520;
+
+  // 吹き出しをパネルの上、かつキャラの頭より上に配置
+  // bottomはウィンドウ下端からの距離
+  const panelHeight = panel ? panel.offsetHeight : 150;
+  const hudHeight   = document.getElementById('hud') ? document.getElementById('hud').offsetHeight : 56;
+
+  // キャラの底辺はground(110px)の上なので bottom=110px
+  // キャラ頭頂 = bottom:110 + charH:144 = 254pxあたり
+  // 吹き出しはキャラ頭頂より上に出す
+  const charBottom  = 110; // ground height
+  const charTopFromBottom = charBottom + charH + 20; // キャラ頭より20px上
+
+  // パネル上端からの余裕を取って、吹き出しがパネルに被らないように
+  const safeBottom = Math.max(charTopFromBottom, panelHeight + 20);
+  el.style.bottom = safeBottom + 'px';
   el.style.top    = '';
 
-  // 水平位置: キャリーの左側に吹き出しを出す（キャリーに被らないよう左寄り）
-  // 吹き出し幅を動的に取得（max-width:340px）
-  const bubbleW  = Math.min(el.scrollWidth || 300, 340);
-  // キャリーの左端から吹き出しが始まり、右端がキャリーの中央あたりに来るよう
-  const leftPos  = Math.max(8, G.charX - bubbleW + 40);
-  el.style.left  = leftPos + 'px';
+  // 水平位置：スマホでは画面幅が狭いのでキャラ位置に関わらず左端から出す
+  if (isMobile) {
+    el.style.left = '8px';
+    el.style.maxWidth = (window.innerWidth - 16) + 'px';
+  } else {
+    const bubbleW  = Math.min(el.scrollWidth || 300, 340);
+    const leftPos  = Math.max(8, G.charX - bubbleW + 40);
+    el.style.left  = leftPos + 'px';
+    el.style.maxWidth = '340px';
+  }
 
   el.classList.add('show');
   clearTimeout(el._hideTimer);
@@ -4217,6 +4606,9 @@ function _returnFriendHome(friendId) {
 }
 
 function showFriendSpeech(friendId, msg) {
+  // スマホでは画面が狭いのでフレンドのセリフは非表示
+  if (window.innerWidth <= 520) return;
+
   // 前のキャラが発話中なら先に戻す
   if (_currentFriend && _currentFriend !== friendId) {
     clearTimeout(FRIEND_SPEECH_TIMERS[_currentFriend]);
@@ -12195,7 +12587,12 @@ init();
 <!-- ======== 中学歴史クイズ TOP ======== -->
 <div class="screen hidden" id="hqTopScreen" style="flex-direction:column;align-items:center;justify-content:flex-start;background:linear-gradient(145deg,#0A0A1A,#0E1628,#1A0A2E,#0E1628);position:relative;overflow-y:auto;">
   <div id="hqStarField" style="position:fixed;inset:0;pointer-events:none;z-index:0;"></div>
-  <div style="position:relative;z-index:1;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:16px 12px 24px;">
+  <!-- スマホ用：トップへ戻るボタンをsticky固定 -->
+  <div id="hqTopNavBar" style="position:sticky;top:0;z-index:10;width:100%;display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:rgba(10,10,26,.92);backdrop-filter:blur(8px);border-bottom:1px solid rgba(91,184,255,.15);box-sizing:border-box;">
+    <button onclick="showScreen('titleScreen')" style="font-family:var(--round);font-size:.75rem;font-weight:700;padding:6px 14px;border-radius:10px;background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.15);color:var(--muted);cursor:pointer;-webkit-tap-highlight-color:transparent;">← トップへ戻る</button>
+    <div style="font-family:var(--round);font-size:.75rem;font-weight:800;color:var(--amber);">📚 中学歴史クイズ</div>
+  </div>
+  <div style="position:relative;z-index:1;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:12px 8px 60px;box-sizing:border-box;">
   <div style="position:relative;text-align:center;margin-bottom:8px;">
     <div style="font-family:var(--round);font-size:.85rem;font-weight:700;color:var(--blue);letter-spacing:.15em;margin-bottom:6px;text-shadow:0 0 12px rgba(91,184,255,.6);">📚 高校受験対策</div>
     <div style="font-family:var(--round);font-size:1.7rem;font-weight:800;color:var(--amber);text-shadow:3px 3px 0 #7A5000,0 0 24px rgba(255,212,67,.45);letter-spacing:.08em;line-height:1.2;">中学歴史<br>クイズゲーム</div>
@@ -12221,7 +12618,6 @@ init();
     <button onclick="hqStartQuiz(13)" style="font-family:var(--round);font-size:.72rem;font-weight:800;padding:9px 5px;border-radius:11px;cursor:pointer;transition:all .2s;text-align:center;line-height:1.35;width:100%;border:2px solid rgba(160,200,255,.5);background:rgba(160,200,255,.12);color:#C0D8FF;" onmouseover="this.style.background='rgba(160,200,255,.25)';this.style.borderColor='#A0C8FF';this.style.color='#A0C8FF';this.style.transform='translateY(-2px)'" onmouseout="this.style.background='rgba(160,200,255,.12)';this.style.borderColor='rgba(160,200,255,.5)';this.style.color='#C0D8FF';this.style.transform=''">🏙️ 単元14<br>江戸時代<br>幕府成立・幕藩体制</button>
     <button onclick="hqStartQuiz(14)" style="font-family:var(--round);font-size:.72rem;font-weight:800;padding:9px 5px;border-radius:11px;cursor:pointer;transition:all .2s;text-align:center;line-height:1.35;width:100%;border:2px solid rgba(255,200,80,.5);background:rgba(255,200,80,.12);color:#FFE090;" onmouseover="this.style.background='rgba(255,200,80,.25)';this.style.borderColor='#FFC850';this.style.color='#FFC850';this.style.transform='translateY(-2px)'" onmouseout="this.style.background='rgba(255,200,80,.12)';this.style.borderColor='rgba(255,200,80,.5)';this.style.color='#FFE090';this.style.transform=''">📜 単元15<br>江戸時代<br>改革・化政文化</button>
   </div>
-  <button onclick="showScreen('titleScreen')" style="margin-top:10px;font-family:var(--round);font-size:.75rem;font-weight:700;padding:7px 16px;border-radius:10px;background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.15);color:var(--muted);cursor:pointer;">← トップへ戻る</button>
   </div><!-- end inner wrapper -->
 </div>
 
@@ -13732,6 +14128,345 @@ function hqPrintBonus() {
 
 </script>
 
+<!-- ======== スマホ仮想キーボード ======== -->
+<div id="mobileKbd">
+  <!-- 収納ボタン（右上） -->
+  <div id="mkbdCollapseBar" style="display:flex;justify-content:flex-end;padding:0 4px 2px;">
+    <button id="mkbdCollapseBtn" style="
+      background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);
+      color:rgba(255,255,255,.5);border-radius:6px;font-size:.68rem;
+      padding:2px 10px;cursor:pointer;font-family:sans-serif;
+      -webkit-tap-highlight-color:transparent;touch-action:manipulation;
+    ">▼ キーボードを隠す</button>
+  </div>
+  <!-- ローマ字行1 -->
+  <div class="mkbd-row">
+    <div class="mkbd-key" data-k="q">q</div><div class="mkbd-key" data-k="w">w</div>
+    <div class="mkbd-key" data-k="e">e</div><div class="mkbd-key" data-k="r">r</div>
+    <div class="mkbd-key" data-k="t">t</div><div class="mkbd-key" data-k="y">y</div>
+    <div class="mkbd-key" data-k="u">u</div><div class="mkbd-key" data-k="i">i</div>
+    <div class="mkbd-key" data-k="o">o</div><div class="mkbd-key" data-k="p">p</div>
+  </div>
+  <!-- ローマ字行2 -->
+  <div class="mkbd-row">
+    <div class="mkbd-key" data-k="a">a</div><div class="mkbd-key" data-k="s">s</div>
+    <div class="mkbd-key" data-k="d">d</div><div class="mkbd-key" data-k="f">f</div>
+    <div class="mkbd-key" data-k="g">g</div><div class="mkbd-key" data-k="h">h</div>
+    <div class="mkbd-key" data-k="j">j</div><div class="mkbd-key" data-k="k">k</div>
+    <div class="mkbd-key" data-k="l">l</div>
+  </div>
+  <!-- ローマ字行3 -->
+  <div class="mkbd-row">
+    <div class="mkbd-key" data-k="z">z</div><div class="mkbd-key" data-k="x">x</div>
+    <div class="mkbd-key" data-k="c">c</div><div class="mkbd-key" data-k="v">v</div>
+    <div class="mkbd-key" data-k="b">b</div><div class="mkbd-key" data-k="n">n</div>
+    <div class="mkbd-key" data-k="m">m</div>
+    <div class="mkbd-key mkbd-wide" data-k="-">ー(－)</div>
+  </div>
+  <!-- 下段 -->
+  <div class="mkbd-row">
+    <div class="mkbd-key mkbd-bs" data-k="BS">⌫ BS</div>
+    <div class="mkbd-key mkbd-xwide" data-k=" ">スペース</div>
+    <div class="mkbd-key mkbd-info" id="mkbdNextHint">次: ？</div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// スマホ仮想キーボード制御 v9-fix
+// ============================================================
+(function(){
+  'use strict';
+
+  var isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+  if (!isTouch) return;
+
+  // カスタムカーソル非表示
+  document.body.style.cursor = 'auto';
+  var cur = document.getElementById('cursor');
+  if (cur) cur.style.display = 'none';
+
+  var kbd = document.getElementById('mobileKbd');
+  if (!kbd) return;
+
+  // ---- 状態 ----
+  var _userCollapsed = false; // ユーザーが手動で収納中か
+
+  // ---- タイピング対象スクリーン ----
+  var TYPING_SCREENS = ['gameScreen','practiceScreen','kanjiScreen','eiScreen','quizScreen'];
+
+  // ---- クリア/モーダル系スクリーン（KBD非表示） ----
+  var MODAL_SCREENS = ['clearScreen','gameoverScreen','allClearScreen','homeConfirmScreen'];
+
+  function getActiveScreen() {
+    var all = document.querySelectorAll('.screen');
+    for (var i = 0; i < all.length; i++) {
+      if (!all[i].classList.contains('hidden') && all[i].id) return all[i].id;
+    }
+    return null;
+  }
+
+  function isModalVisible() {
+    for (var i = 0; i < MODAL_SCREENS.length; i++) {
+      var m = document.getElementById(MODAL_SCREENS[i]);
+      if (m && !m.classList.contains('hidden')) return true;
+    }
+    return false;
+  }
+
+  // KBDを表示すべき状態か（ユーザー収納・モーダル・非タイピング画面では false）
+  function shouldShowKbd() {
+    if (_userCollapsed) return false;
+    if (isModalVisible()) return false;
+    var sc = getActiveScreen();
+    if (!sc || TYPING_SCREENS.indexOf(sc) < 0) return false;
+    if (sc === 'quizScreen') return typeof Q !== 'undefined' && Q.phase === 'typing';
+    return true;
+  }
+
+  // ---- レイアウト調整 ----
+  function applyLayout(kbdH) {
+    var panel = document.getElementById('typingPanel');
+    var ground = document.getElementById('gameGround');
+    var charWrap = document.getElementById('charWrap');
+    if (panel)   panel.style.bottom   = kbdH + 'px';
+    if (ground)  ground.style.bottom  = kbdH + 'px';
+    if (charWrap) {
+      var panelH = panel ? panel.offsetHeight : 150;
+      charWrap.style.bottom = (panelH + kbdH + 8) + 'px';
+    }
+  }
+
+  // ---- KBD 表示 ----
+  function showKbd() {
+    kbd.style.display = 'flex';
+    requestAnimationFrame(function() {
+      applyLayout(kbd.offsetHeight);
+      updateNextHint();
+    });
+  }
+
+  // ---- KBD 非表示 ----
+  function hideKbd() {
+    kbd.style.display = 'none';
+    applyLayout(0);
+    if (typeof _updateCharBottom === 'function') setTimeout(_updateCharBottom, 30);
+  }
+
+  // ---- 収納バー表示（キーなし） ----
+  function showCollapseBarOnly() {
+    // キー行を隠してバーだけ flex で表示
+    kbd.querySelectorAll('.mkbd-row').forEach(function(r){ r.style.display='none'; });
+    kbd.style.display = 'flex';
+    requestAnimationFrame(function() {
+      applyLayout(kbd.offsetHeight); // バーだけの高さ
+      if (typeof _updateCharBottom === 'function') setTimeout(_updateCharBottom, 30);
+    });
+  }
+
+  function restoreKbdRows() {
+    kbd.querySelectorAll('.mkbd-row').forEach(function(r){ r.style.display=''; });
+  }
+
+  // ---- 状態に応じて表示を同期 ----
+  function syncKbd() {
+    if (_userCollapsed) {
+      // バーだけ表示（タイピング画面のみ）
+      var sc = getActiveScreen();
+      var inTyping = sc && TYPING_SCREENS.indexOf(sc) >= 0 && !isModalVisible();
+      if (inTyping) {
+        showCollapseBarOnly();
+      } else {
+        hideKbd();
+      }
+    } else if (shouldShowKbd()) {
+      restoreKbdRows();
+      showKbd();
+    } else {
+      hideKbd();
+    }
+  }
+
+  // ---- 収納ボタン ----
+  var collapseBtn = document.getElementById('mkbdCollapseBtn');
+  if (collapseBtn) {
+    collapseBtn.addEventListener('touchstart', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      _userCollapsed = !_userCollapsed;
+      collapseBtn.textContent = _userCollapsed ? '▲ キーボードを表示' : '▼ キーボードを隠す';
+      syncKbd();
+    }, { passive: false });
+  }
+
+  // ---- showScreen フック（画面切替時に収納リセット） ----
+  var _hookSI = setInterval(function(){
+    if (typeof showScreen === 'function') {
+      clearInterval(_hookSI);
+      var _orig = showScreen;
+      window.showScreen = function(id) {
+        _orig(id);
+        _userCollapsed = false;
+        if (collapseBtn) collapseBtn.textContent = '▼ キーボードを隠す';
+        restoreKbdRows();
+        setTimeout(syncKbd, 60);
+      };
+    }
+  }, 80);
+
+  // ---- ヒント更新 ----
+  function updateNextHint() {
+    var hint = document.getElementById('mkbdNextHint');
+    if (!hint) return;
+    var sc = getActiveScreen();
+    try {
+      if (sc === 'gameScreen') {
+        var ep = EPISODES[G.ep]; if (!ep) return;
+        var t = ep.text||'', idx = G.charIdx||0;
+        while (idx<t.length && /[\s\u3000\u3001\u3002\u300c\u300d\uff01\uff1f\u2026\u30fb\uff65]/.test(t[idx])) idx++;
+        hint.textContent = idx<t.length ? '次: '+t[idx] : '次: ？';
+      } else if (sc === 'practiceScreen') {
+        var set = typeof getPracticeSet==='function' ? getPracticeSet() : null;
+        if (set && typeof pState!=='undefined') {
+          var ch = set.keys[pState.charIdx];
+          hint.textContent = ch ? '次: '+(ch===' '?'␣':ch.toUpperCase()) : '完了!';
+        }
+      } else if (sc === 'quizScreen') {
+        if (typeof Q==='undefined'||Q.phase!=='typing'){hint.textContent='選択中';return;}
+        var word=Q.pool&&Q.pool[Q.idx]; if(!word)return;
+        hint.textContent = Q.typingCharIdx<word.en.length ? '次: '+word.en[Q.typingCharIdx].toUpperCase() : '完了!';
+      } else if (sc === 'kanjiScreen') {
+        hint.textContent = 'よみ入力';
+      } else if (sc === 'eiScreen') {
+        if(!EI||!EI.pool)return;
+        var sent=EI_SENTENCES[EI.pool[EI.sentenceIdx]]; if(!sent)return;
+        var tgts=sent.words.filter(function(w){return w.target;});
+        if(EI.wordIdx>=tgts.length)return;
+        var ts=tgts[EI.wordIdx].w.toLowerCase(), buf=EI.buf||'';
+        hint.textContent = buf.length<ts.length ? '次: '+ts[buf.length] : '完了!';
+      }
+    } catch(e){ hint.textContent='次: ？'; }
+  }
+
+  // ---- キー送信 ----
+  function sendKey(k) {
+    var sc = getActiveScreen();
+
+    // KeyboardEvent生成ヘルパー（スペース・BSを正しく処理）
+    function makeEvt(key) {
+      var code = key === ' ' ? 'Space'
+               : key === 'Backspace' ? 'Backspace'
+               : 'Key' + key.toUpperCase();
+      return new KeyboardEvent('keydown', {key:key, code:code, bubbles:true, cancelable:true});
+    }
+
+    if (sc === 'gameScreen') {
+      if (k === 'BS') { if (typeof _romaBuf !== 'undefined') window._romaBuf = ''; return; }
+      document.dispatchEvent(makeEvt(k === 'BS' ? 'Backspace' : k));
+
+    } else if (sc === 'practiceScreen') {
+      if (k === 'BS') return;
+      // onPracticeKey は e.key==='Space' を ' ' に変換するので 'Space' を渡す
+      if (typeof onPracticeKey === 'function')
+        onPracticeKey({key: k === ' ' ? 'Space' : k, preventDefault:function(){}, stopPropagation:function(){}});
+
+    } else if (sc === 'quizScreen') {
+      // タイピングフェーズ：_processTypingChar を直接呼ぶ
+      if (typeof Q !== 'undefined' && Q.phase === 'typing' && typeof _processTypingChar === 'function') {
+        var word = Q.pool && Q.pool[Q.idx];
+        if (word) {
+          _processTypingChar(k === 'BS' ? 'Backspace' : k, word.en, word, null);
+          setTimeout(function(){ syncKbd(); updateNextHint(); }, 50);
+          return;
+        }
+      }
+      // 選択フェーズ等：document へdispatch
+      document.dispatchEvent(makeEvt(k === 'BS' ? 'Backspace' : k));
+
+    } else if (sc === 'kanjiScreen') {
+      document.dispatchEvent(makeEvt(k === 'BS' ? 'Backspace' : k));
+
+    } else if (sc === 'eiScreen') {
+      if (typeof handleEiKey === 'function')
+        handleEiKey({key: k === 'BS' ? 'Backspace' : k, preventDefault:function(){}});
+    }
+    setTimeout(updateNextHint, 50);
+  }
+
+  // ---- inputへのOSキーボードをブロック ----
+  function lockInput(id) {
+    var inp = document.getElementById(id);
+    if (!inp) return;
+    inp.setAttribute('readonly','readonly');
+    inp.setAttribute('tabindex','-1');
+    inp.addEventListener('touchstart',function(e){e.preventDefault();e.stopPropagation();},{passive:false});
+    inp.addEventListener('mousedown',function(e){e.preventDefault();});
+    inp.addEventListener('focus',function(){setTimeout(function(){inp.blur();},0);});
+  }
+
+  // ---- _selectChoice フック ----
+  function hookSelectChoice() {
+    if (typeof _selectChoice!=='function') return false;
+    var _orig=_selectChoice;
+    window._selectChoice=function(idx,firstKey){
+      _orig(idx,firstKey);
+      setTimeout(function(){
+        var inp=document.getElementById('quizTypingInput');
+        if(inp)inp.blur();
+        syncKbd(); updateNextHint();
+      },40);
+    };
+    return true;
+  }
+
+  // ---- タッチイベント ----
+  kbd.addEventListener('touchstart', function(e) {
+    var key = e.target.closest('[data-k]');
+    if (!key) return;
+    e.preventDefault();
+    key.classList.add('mkbd-pressed');
+    sendKey(key.getAttribute('data-k'));
+  }, { passive: false });
+
+  kbd.addEventListener('touchend', function(e) {
+    e.preventDefault();
+    kbd.querySelectorAll('.mkbd-pressed').forEach(function(el){el.classList.remove('mkbd-pressed');});
+  }, { passive: false });
+
+  // ---- フック初期化 ----
+  var _done={ptc:false,ei:false,sc2:false};
+  var _hookAll=setInterval(function(){
+    if(!_done.ptc&&typeof processTypedChar==='function'){
+      _done.ptc=true;var _o=processTypedChar;
+      window.processTypedChar=function(t){_o(t);setTimeout(updateNextHint,30);};
+    }
+    if(!_done.ei&&typeof handleEiKey==='function'){
+      _done.ei=true;var _o2=handleEiKey;
+      window.handleEiKey=function(e){_o2(e);setTimeout(updateNextHint,30);};
+    }
+    if(!_done.sc2&&hookSelectChoice()) _done.sc2=true;
+    if(_done.ptc&&_done.ei&&_done.sc2) clearInterval(_hookAll);
+  },100);
+
+  window.addEventListener('load',function(){
+    lockInput('practiceInput');
+    lockInput('quizTypingInput');
+    lockInput('kanjiTypingInput');
+    // 初期状態：KBDは非表示（display:noneのまま）
+    kbd.style.display = 'none';
+    setTimeout(syncKbd, 300);
+  });
+
+  // 500ms ポーリング
+  setInterval(function(){
+    syncKbd();
+    if (kbd.style.display !== 'none') updateNextHint();
+  }, 500);
+
+})();
+</script>
+
 </body>
 </html>
+
 
