@@ -841,6 +841,15 @@ body { cursor: none; }
               transform .4s cubic-bezier(.34,1.3,.64,1),
               bottom .2s;
 }
+
+/* スマホ：フレンドをパネル上に配置できるようCSSのbottomを無効化 */
+@media (max-width: 520px) {
+  .friendDiv {
+    bottom: auto !important;
+    top: auto !important;
+    transition: none !important; /* JSが直接制御するためtransitionを切る */
+  }
+}
 .friendDiv canvas {
   display: block;
   filter: drop-shadow(0 6px 18px rgba(0,0,0,.4));
@@ -1640,188 +1649,178 @@ body { cursor: none; }
 
   /* モーダルのボタンをタップしやすく */
   .btn { min-height: 44px; }
+} /* end @media (max-width:520px) */
 
-  /* hqTopScreen のスクロールをスマホで確実に有効化 */
-  #hqTopScreen {
-    overflow-y: scroll !important;
-    -webkit-overflow-scrolling: touch !important;
-    overscroll-behavior-y: contain;
-    touch-action: pan-y !important;
-  }
-  /* 星フィールドがタッチを奪わないように */
-  #hqStarField {
-    pointer-events: none !important;
-    touch-action: none !important;
-  }
-  /* 歴史クイズ：単元ボタングリッドをスマホで2列・幅100% */
-  #hqTopScreen [style*="grid-template-columns: 1fr 1fr 1fr"],
-  #hqTopScreen [style*="grid-template-columns:1fr 1fr 1fr"] {
-    grid-template-columns: 1fr 1fr !important;
-    gap: 6px !important;
-    max-width: 100% !important;
-    padding: 0 !important;
-  }
-  /* 単元ボタンのテキストサイズをスマホで調整 */
-  #hqTopScreen button[onclick^="hqStartQuiz"] {
-    font-size: .65rem !important;
-    padding: 7px 4px !important;
-    line-height: 1.3 !important;
-  }
-  /* タイトルや説明文もコンパクトに */
-  #hqTopScreen [style*="font-size:1.7rem"] { font-size: 1.3rem !important; }
-  #hqTopScreen [style*="font-size:.8rem"] { font-size: .72rem !important; line-height: 1.5 !important; }
-  /* 横幅が画面からはみ出さないように */
-  #hqTopScreen > div { width: 100% !important; max-width: 100% !important; box-sizing: border-box !important; }
+/* ============================
+   歴史クイズ メニュー再構築（全デバイス共通）
+   ============================ */
+#hqTopScreen {
+  background: linear-gradient(145deg,#0A0A1A,#0E1628,#1A0A2E,#0E1628);
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  overflow: hidden;
+}
+#hqMenuWrap {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;  /* 親(.screen)がfixed inset:0なのでheight:100%が効く */
+  overflow: hidden;
+}
+#hqMenuNav {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  background: rgba(10,10,26,.92);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(91,184,255,.15);
+  box-sizing: border-box;
+}
+#hqBackBtn {
+  font-family: var(--round);
+  font-size: .75rem; font-weight: 700;
+  padding: 6px 14px; border-radius: 10px;
+  background: rgba(255,255,255,.07);
+  border: 1.5px solid rgba(255,255,255,.15);
+  color: var(--muted); cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+#hqMenuTitle {
+  font-family: var(--round);
+  font-size: .75rem; font-weight: 800;
+  color: var(--amber);
+}
+/* スクロール領域 */
+#hqMenuBody {
+  flex: 1 1 0;
+  min-height: 0;       /* flexアイテムがスクロール可能になるための必須設定 */
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  touch-action: pan-y;
+  padding: 12px 10px 80px;
+  box-sizing: border-box;
+}
+.hqm-label {
+  font-family: var(--round); font-size: .82rem; font-weight: 700;
+  color: var(--blue); letter-spacing: .15em;
+  margin-bottom: 6px;
+  text-shadow: 0 0 12px rgba(91,184,255,.6);
+  text-align: center;
+}
+.hqm-title {
+  font-family: var(--round); font-size: clamp(1.3rem,4vw,1.7rem);
+  font-weight: 800; color: var(--amber);
+  text-shadow: 3px 3px 0 #7A5000, 0 0 24px rgba(255,212,67,.45);
+  letter-spacing: .08em; line-height: 1.2;
+  text-align: center; margin-bottom: 4px;
+}
+.hqm-sub {
+  font-family: var(--round); font-size: .68rem; font-weight: 700;
+  color: var(--muted); letter-spacing: .2em;
+  text-align: center; margin-bottom: 10px;
+}
+#hqMenuDesc {
+  font-family: var(--round); font-size: .78rem;
+  color: var(--muted); text-align: center;
+  line-height: 1.7; margin-bottom: 12px;
+}
+.hqm-em   { color: var(--amber); font-weight: 700; }
+.hqm-gold { color: #FFD700; font-weight: 700; }
+/* グリッド：PC=3列、スマホ=2列 */
+#hqMenuGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+@media (max-width: 520px) {
+  #hqMenuGrid { grid-template-columns: repeat(2, 1fr); gap: 6px; }
+  .hqm-btn { font-size: .62rem !important; padding: 8px 4px !important; }
+}
+.hqm-btn {
+  font-family: var(--round);
+  font-size: .72rem; font-weight: 800;
+  padding: 10px 6px;
+  border-radius: 11px;
+  cursor: pointer;
+  text-align: center;
+  line-height: 1.4;
+  width: 100%;
+  border: 2px solid;
+  transition: background .15s, transform .1s;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  box-sizing: border-box;
+}
+.hqm-btn:active { transform: translateY(1px); opacity: .85; }
+
+@media (max-width: 520px) {
   /* その他スクロール可能画面すべてに touch-action を付与 */
   #quizScreen, #kanjiScreen, #eiScreen, #howScreen, #titleScreen,
   #hqQuizScreen, #hqResultScreen, #hqBonusScreen {
     touch-action: pan-y !important;
   }
 
-  /* ===== 英語例文・英単語クイズ：横はみ出し修正 ===== */
+  /* ===== ゲーム画面：スマホでキャラ・地面を縮小 ===== */
+  #gameGround { height: 70px !important; }
+  #groundGrass { bottom: 42px !important; height: 22px !important; }
+  #groundDirt  { height: 46px !important; }
 
-  /* ===== 練習モード：レベルタブの横はみ出し修正 ===== */
+  /* ===== 練習モード ===== */
   #practiceScreen { overflow-x: hidden !important; }
-  #practiceTopBar {
-    flex-wrap: wrap !important;
-    gap: 6px !important;
-  }
-  /* キャラとタイトルを縮小 */
+  #practiceTopBar { flex-wrap: wrap !important; gap: 6px !important; }
   #practiceTopBar canvas { width: 44px !important; height: auto !important; }
   .practice-title-text h2 { font-size: .85rem !important; }
   .practice-title-text p  { font-size: .58rem !important; }
-  /* レベルタブを折り返し */
-  #practiceLevelTabs {
-    flex-wrap: wrap !important;
-    gap: 4px !important;
-    width: 100% !important;
-  }
-  .ptab {
-    font-size: .6rem !important;
-    padding: 5px 10px !important;
-    flex: 1 1 auto !important;
-    text-align: center !important;
-  }
-  #eiScreen  { overflow-x: hidden !important; }
-  #quizScreen { overflow-x: hidden !important; }
-  #eiInner   { padding-left: 8px !important; padding-right: 8px !important; box-sizing: border-box !important; width: 100% !important; }
-  #quizInner { padding-left: 8px !important; padding-right: 8px !important; box-sizing: border-box !important; width: 100% !important; }
+  #practiceLevelTabs { flex-wrap: wrap !important; gap: 4px !important; width: 100% !important; }
+  .ptab { font-size: .6rem !important; padding: 5px 10px !important; flex: 1 1 auto !important; text-align: center !important; }
 
-  /* ── 英語例文 eiScreen ── */
-  /* グリッドを縦1列 */
+  /* ===== 英語例文 eiScreen ===== */
+  #eiScreen  { overflow-x: hidden !important; }
+  #eiInner   { padding-left: 8px !important; padding-right: 8px !important; box-sizing: border-box !important; width: 100% !important; }
   #eiMain { grid-template-columns: 1fr !important; }
-  /* トップバー */
-  #eiTopBar { padding: 8px 8px !important; gap: 6px !important; overflow: hidden; flex-wrap: wrap !important; }
-  /* テーマタブをスクロール可能に（wrap済みだが念のため） */
+  #eiTopBar { padding: 8px !important; gap: 6px !important; flex-wrap: wrap !important; }
   #eiThemeTabs { flex-wrap: wrap !important; gap: 4px !important; }
   #eiThemeTabs .ptab { font-size: .62rem !important; padding: 3px 8px !important; }
-  /* カード */
   #eiCard { padding: 10px 8px !important; gap: 8px !important; }
-  /* 日本語訳 */
-  #eiJa {
-    font-size: .88rem !important;
-    white-space: normal !important;
-    word-break: break-word !important;
-    overflow-wrap: break-word !important;
-  }
-  /* 英文表示エリア */
-  #eiEnDisplay {
-    font-size: .95rem !important;
-    white-space: normal !important;
-    word-break: break-word !important;
-    overflow-wrap: break-word !important;
-    line-height: 1.7 !important;
-    letter-spacing: .02em !important;
-  }
-  /* タイピング表示：横スクロール可能・nowrap解除 */
-  #eiTypingDisplay {
-    flex-wrap: wrap !important;
-    overflow-x: auto !important;
-    overflow-y: hidden !important;
-    -webkit-overflow-scrolling: touch !important;
-    justify-content: flex-start !important;
-    padding: 8px 10px !important;
-    min-height: 44px !important;
-    gap: 3px !important;
-  }
-  /* ヒント・フィードバック */
+  #eiJa { font-size: .88rem !important; white-space: normal !important; word-break: break-word !important; overflow-wrap: break-word !important; }
+  #eiEnDisplay { font-size: .95rem !important; white-space: normal !important; word-break: break-word !important; overflow-wrap: break-word !important; line-height: 1.7 !important; }
+  #eiTypingDisplay { flex-wrap: wrap !important; overflow-x: auto !important; justify-content: flex-start !important; padding: 8px 10px !important; }
   #eiKeyHint { font-size: .65rem !important; }
-  #eiKeyHint b { white-space: nowrap; }
 
-  /* スコアボード */
-  #eiScoreBoard { gap: 4px !important; }
-  /* ログ・単語統計の高さを縮小 */
-  #eiLog      { max-height: 140px !important; }
-  #eiWordStats { max-height: 140px !important; }
-  /* 進捗テキスト */
-  #eiProgressOuter { font-size: .65rem !important; }
-
-  /* ── 英単語クイズ quizScreen ── */
+  /* ===== 英単語クイズ quizScreen ===== */
+  #quizScreen { overflow-x: hidden !important; }
+  #quizInner { padding-left: 8px !important; padding-right: 8px !important; box-sizing: border-box !important; width: 100% !important; }
   #quizTopBar { padding: 8px !important; flex-wrap: wrap !important; }
-  #quizGradeTabs { flex-wrap: wrap !important; }
   #quizCard { padding: 14px 10px !important; }
   #quizWordJa { font-size: 1.1rem !important; }
-  /* 選択肢：1列 */
-  #quizChoices {
-    grid-template-columns: 1fr !important;
-    gap: 6px !important;
-  }
-  .quiz-choice {
-    font-size: .9rem !important;
-    padding: 11px 10px 11px 34px !important;
-    line-height: 1.4 !important;
-  }
-  /* タイピング入力 */
-  #quizTypingDisplay {
-    flex-wrap: wrap !important;
-    overflow-x: auto !important;
-    justify-content: flex-start !important;
-    padding: 8px 10px !important;
-  }
-  /* quizScreen内コンテナ */
+  #quizChoices { grid-template-columns: 1fr !important; gap: 6px !important; }
+  .quiz-choice { font-size: .9rem !important; padding: 11px 10px 11px 34px !important; }
+  #quizTypingDisplay { flex-wrap: wrap !important; overflow-x: auto !important; justify-content: flex-start !important; padding: 8px 10px !important; }
   #quizScreen > div { max-width: 100% !important; box-sizing: border-box !important; }
 
-  /* ===== タイトル画面：スマホ完全対応 ===== */
-  #titleScreen {
-    overflow-y: auto !important;
-    justify-content: flex-start !important;
-  }
-  /* ピクセルアートを小さく（上部に表示） */
+  /* ===== タイトル画面 ===== */
+  #titleScreen { overflow-y: auto !important; justify-content: flex-start !important; }
   #titleCharWrap canvas { width: 72px !important; }
-  /* タイトルロゴを縮小 */
   .title-logo { font-size: clamp(.95rem, 4.5vw, 1.3rem) !important; }
-  /* px-card内のレイアウト：縦1列 */
-  #titleInner {
-    flex-direction: column !important;
-    align-items: center !important;
-    gap: 8px !important;
-  }
-  /* 書影バナーをスマホで小さく中央寄せ */
-  #bookBanner {
-    margin: 0 auto !important;
-    margin-left: 0 !important;
-    transform: scale(0.65) !important;
-    transform-origin: top center !important;
-    height: 120px !important;
-  }
-  /* ボタンを画面幅いっぱいに */
+  #titleInner { flex-direction: column !important; align-items: center !important; gap: 8px !important; }
+  #bookBanner { margin: 0 auto !important; transform: scale(0.65) !important; transform-origin: top center !important; height: 120px !important; }
   #titleInner > div:last-child { width: 100% !important; }
-  #titleInner .btn {
-    width: 100% !important;
-    max-width: 360px !important;
-    font-size: .88rem !important;
-    padding: 11px 10px !important;
-  }
-  /* px-cardをコンパクトに */
-  #titleScreen .px-card {
-    padding: 6px 10px !important;
-    width: calc(100% - 16px) !important;
-  }
-  /* 外部バナーをコンパクトに */
-  #titleScreen [style*="max-width:580px"] {
-    max-width: calc(100% - 16px) !important;
-  }
-}
+  #titleInner .btn { width: 100% !important; max-width: 360px !important; font-size: .88rem !important; padding: 11px 10px !important; }
+  #titleScreen .px-card { padding: 6px 10px !important; width: calc(100% - 16px) !important; }
+  #titleScreen [style*="max-width:580px"] { max-width: calc(100% - 16px) !important; }
+} /* end @media (max-width:520px) mobile rules */
 
 /* ============================
    QUIZ SCREEN
@@ -3366,6 +3365,10 @@ function showScreen(id) {
       el.classList.add('hidden');
     }
   });
+  // 歴史クイズTOP表示時にグリッドを再構築
+  if (id === 'hqTopScreen' && typeof _buildHqMenu === 'function') {
+    requestAnimationFrame(_buildHqMenu);
+  }
 }
 
 function hideModal(id) { document.getElementById(id).classList.add('hidden'); }
@@ -12429,7 +12432,36 @@ document.addEventListener('keydown', function(e) {
 function init() {
   initTitle();
   initClouds();
+  _buildHqMenu(); // 歴史クイズメニューを動的生成
   showScreen('titleScreen');
+}
+
+// 歴史クイズ単元メニューをJSで動的生成
+function _buildHqMenu() {
+  const grid = document.getElementById('hqMenuGrid');
+  if (!grid) { console.warn('hqMenuGrid not found'); return; }
+  const units = [
+    { icon:'🌍', title:'単元1',  sub:'人類の出現・進化\n旧石器・新石器時代',       bc:'rgba(91,184,255,.5)',  bg:'rgba(91,184,255,.18)',  tc:'#8ACFFF' },
+    { icon:'🏛️', title:'単元2',  sub:'古代文明\nエジプト・メソポタミア',           bc:'rgba(255,126,200,.5)', bg:'rgba(255,126,200,.18)', tc:'#FFB0DD' },
+    { icon:'⚔️', title:'単元3',  sub:'ギリシャ・ローマ\n宗教の誕生',               bc:'rgba(61,236,168,.5)',  bg:'rgba(61,236,168,.18)',  tc:'#7AEFCC' },
+    { icon:'🌾', title:'単元4',  sub:'縄文時代\n弥生時代',                         bc:'rgba(255,212,67,.5)',  bg:'rgba(255,212,67,.18)',  tc:'#FFE06A' },
+    { icon:'👸', title:'単元5',  sub:'邪馬台国\n大和政権',                         bc:'rgba(255,85,119,.5)',  bg:'rgba(255,85,119,.18)',  tc:'#FF8FA8' },
+    { icon:'🏯', title:'単元6',  sub:'聖徳太子の政治\n飛鳥文化',                   bc:'rgba(168,120,255,.5)', bg:'rgba(168,120,255,.18)', tc:'#C8A0FF' },
+    { icon:'⚔️', title:'単元7',  sub:'大化の改新\n律令国家',                       bc:'rgba(255,160,80,.5)',  bg:'rgba(255,160,80,.18)',  tc:'#FFB870' },
+    { icon:'🏛️', title:'単元8',  sub:'奈良時代\n平城京・天平文化',                 bc:'rgba(80,200,220,.5)',  bg:'rgba(80,200,220,.18)',  tc:'#80D8E8' },
+    { icon:'🌸', title:'単元9',  sub:'平安時代\n平安京・国風文化',                 bc:'rgba(220,160,255,.5)', bg:'rgba(220,160,255,.18)', tc:'#E0B0FF' },
+    { icon:'⚔️', title:'単元10', sub:'鎌倉時代\n幕府成立・元寇・崩壊',             bc:'rgba(255,140,60,.5)',  bg:'rgba(255,140,60,.18)',  tc:'#FFB07A' },
+    { icon:'🏯', title:'単元11', sub:'室町時代\n幕府・南北朝・戦国',               bc:'rgba(100,200,120,.5)', bg:'rgba(100,200,120,.18)', tc:'#90D8A0' },
+    { icon:'🌍', title:'単元12', sub:'中世ヨーロッパ・大航海\nルネサンス・鉄砲伝来', bc:'rgba(80,160,220,.5)',  bg:'rgba(80,160,220,.18)',  tc:'#90C8F0' },
+    { icon:'🔥', title:'単元13', sub:'安土桃山時代\n信長・秀吉・桃山文化',         bc:'rgba(255,80,80,.5)',   bg:'rgba(255,80,80,.18)',   tc:'#FF9999' },
+    { icon:'🏙️', title:'単元14', sub:'江戸時代\n幕府成立・幕藩体制',               bc:'rgba(160,200,255,.5)', bg:'rgba(160,200,255,.18)', tc:'#C0D8FF' },
+    { icon:'📜', title:'単元15', sub:'江戸時代\n改革・化政文化',                   bc:'rgba(255,200,80,.5)',  bg:'rgba(255,200,80,.18)',  tc:'#FFE090' },
+  ];
+  grid.innerHTML = units.map((u, i) => {
+    const sub = u.sub.split('\n').join('<br>');
+    return `<button class="hqm-btn" onclick="hqStartQuiz(${i})" style="border-color:${u.bc};background:${u.bg};color:${u.tc};">${u.icon} ${u.title}<br><span style="font-size:.9em;opacity:.9;">${sub}</span></button>`;
+  }).join('');
+  console.log('hqMenuGrid built:', grid.children.length, 'buttons');
 }
 
 // フレンドの待機位置（画面右端からのオフセット）
@@ -12437,14 +12469,13 @@ function init() {
 const FRIEND_HOME_IDX = { sachan: 0, yacchan: 1, akkun: 2 };
 
 function _getFriendHomeLeft(friendId) {
-  const vw      = window.innerWidth;
-  const cw      = 120; // canvasの幅
-  const scale   = 0.75; // 待機中のスケール
-  const visW    = Math.ceil(cw * scale); // 実際に見える幅 = 90px
-  const margin  = 6;  // 画面端との余白
-  const idx     = FRIEND_HOME_IDX[friendId] ?? 0;
-  // idx=0(sachan)が一番右。left = vw - visW - margin - idx*(visW+8)
-  return vw - visW - margin - idx * (visW + 8);
+  const vw       = window.innerWidth;
+  const isMobile = vw <= 520;
+  const scale    = isMobile ? 0.45 : 0.75;
+  const visW     = Math.ceil(120 * scale);
+  const margin   = 4;
+  const idx      = FRIEND_HOME_IDX[friendId] ?? 0;
+  return vw - visW - margin - idx * (visW + 4);
 }
 
 // キャラクターのbottomをタイピングパネル高さに合わせて更新
@@ -12452,24 +12483,42 @@ function _updateCharBottom() {
   const panel = document.getElementById('typingPanel');
   const wrap  = document.getElementById('charWrap');
   if (!panel) return;
-  const h = panel.offsetHeight;
-  if (wrap) wrap.style.bottom = (h + 8) + 'px';
-  // フレンドの待機bottom: 背景オブジェクトと重ならないよう高め（キャラ高さ分上げる）
-  const friendHomeBottom = h + 8 + Math.max(0, Math.floor(window.innerHeight * 0.18));
+
+  const panelH   = panel.offsetHeight;
+  // panel.style.bottom はKBD分のオフセット（'0px' or '200px'など）
+  const panelBot = parseInt(panel.style.bottom) || 0;
+  const totalBot = panelH + panelBot; // 画面下端からパネル上端まで
+
+  const isMobile    = window.innerWidth <= 520;
+  const charScale   = isMobile ? 0.55 : 1.0;
+  const friendScale = isMobile ? 0.45 : 0.75;
+
+  // キャリー
+  if (wrap) {
+    wrap.style.bottom        = (totalBot + 8) + 'px';
+    wrap.style.transform     = `scale(${charScale})`;
+    wrap.style.transformOrigin = 'bottom left';
+  }
+
+  // フレンド待機位置
+  const friendBottom = isMobile
+    ? totalBot + 10
+    : totalBot + Math.floor(window.innerHeight * 0.18);
+
   FRIENDS.forEach(f => {
     const fw = document.getElementById('wrap_' + f.id);
     if (!fw) return;
     fw.style.right = 'auto';
     if (!fw.classList.contains('speaking')) {
-      fw.style.bottom    = friendHomeBottom + 'px';
-      fw.style.left      = _getFriendHomeLeft(f.id) + 'px';
-      fw.style.transform = 'scale(0.75)';
+      fw.style.bottom        = friendBottom + 'px';
+      fw.style.left          = _getFriendHomeLeft(f.id) + 'px';
+      fw.style.transform     = `scale(${friendScale})`;
+      fw.style.transformOrigin = 'bottom left';
     } else {
-      // セリフ中はキャリーと同じ高さ
-      fw.style.bottom = (h + 8) + 'px';
+      fw.style.bottom = (totalBot + 8) + 'px';
     }
   });
-  // 背景も再描画
+
   renderEpBg(G.ep);
 }
 window.addEventListener('resize', _updateCharBottom);
@@ -12585,41 +12634,26 @@ init();
   </div>
 </div>
 <!-- ======== 中学歴史クイズ TOP ======== -->
-<div class="screen hidden" id="hqTopScreen" style="flex-direction:column;align-items:center;justify-content:flex-start;background:linear-gradient(145deg,#0A0A1A,#0E1628,#1A0A2E,#0E1628);position:relative;overflow-y:auto;">
+<div class="screen hidden" id="hqTopScreen">
   <div id="hqStarField" style="position:fixed;inset:0;pointer-events:none;z-index:0;"></div>
-  <!-- スマホ用：トップへ戻るボタンをsticky固定 -->
-  <div id="hqTopNavBar" style="position:sticky;top:0;z-index:10;width:100%;display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:rgba(10,10,26,.92);backdrop-filter:blur(8px);border-bottom:1px solid rgba(91,184,255,.15);box-sizing:border-box;">
-    <button onclick="showScreen('titleScreen')" style="font-family:var(--round);font-size:.75rem;font-weight:700;padding:6px 14px;border-radius:10px;background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.15);color:var(--muted);cursor:pointer;-webkit-tap-highlight-color:transparent;">← トップへ戻る</button>
-    <div style="font-family:var(--round);font-size:.75rem;font-weight:800;color:var(--amber);">📚 中学歴史クイズ</div>
-  </div>
-  <div style="position:relative;z-index:1;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:12px 8px 60px;box-sizing:border-box;">
-  <div style="position:relative;text-align:center;margin-bottom:8px;">
-    <div style="font-family:var(--round);font-size:.85rem;font-weight:700;color:var(--blue);letter-spacing:.15em;margin-bottom:6px;text-shadow:0 0 12px rgba(91,184,255,.6);">📚 高校受験対策</div>
-    <div style="font-family:var(--round);font-size:1.7rem;font-weight:800;color:var(--amber);text-shadow:3px 3px 0 #7A5000,0 0 24px rgba(255,212,67,.45);letter-spacing:.08em;line-height:1.2;">中学歴史<br>クイズゲーム</div>
-    <div style="font-family:var(--round);font-size:.72rem;font-weight:700;color:var(--muted);letter-spacing:.2em;margin-top:4px;">JUNIOR HIGH HISTORY QUIZ</div>
-  </div>
-  <div style="font-family:var(--round);font-size:.8rem;color:var(--muted);text-align:center;line-height:1.8;margin-bottom:10px;">
-    各単元 <span style="color:var(--amber);font-weight:700;">三択問題 30問</span>に挑戦！　全問終了後に <span style="color:#FFD700;font-weight:700;">🎁 高校受験超対策資料</span>＋<span style="color:#FFD700;font-weight:700;">満点を取るコツ</span> をプレゼント！
-  </div>
-  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;width:100%;max-width:720px;padding:0 8px;margin-bottom:12px;">
-    <button onclick="hqStartQuiz(0)" style="font-family:var(--round);font-size:.72rem;font-weight:800;padding:9px 5px;border-radius:11px;cursor:pointer;transition:all .2s;text-align:center;line-height:1.35;width:100%;border:2px solid rgba(91,184,255,.5);background:rgba(91,184,255,.12);color:#8ACFFF;" onmouseover="this.style.background='rgba(91,184,255,.25)';this.style.borderColor='#5BB8FF';this.style.color='#5BB8FF';this.style.transform='translateY(-2px)'" onmouseout="this.style.background='rgba(91,184,255,.12)';this.style.borderColor='rgba(91,184,255,.5)';this.style.color='#8ACFFF';this.style.transform=''">🌍 単元1<br>人類の出現・進化<br>旧石器・新石器時代</button>
-    <button onclick="hqStartQuiz(1)" style="font-family:var(--round);font-size:.72rem;font-weight:800;padding:9px 5px;border-radius:11px;cursor:pointer;transition:all .2s;text-align:center;line-height:1.35;width:100%;border:2px solid rgba(255,126,200,.5);background:rgba(255,126,200,.12);color:#FFB0DD;" onmouseover="this.style.background='rgba(255,126,200,.25)';this.style.borderColor='#FF7EC8';this.style.color='#FF7EC8';this.style.transform='translateY(-2px)'" onmouseout="this.style.background='rgba(255,126,200,.12)';this.style.borderColor='rgba(255,126,200,.5)';this.style.color='#FFB0DD';this.style.transform=''">🏛️ 単元2<br>古代文明<br>エジプト・メソポタミア</button>
-    <button onclick="hqStartQuiz(2)" style="font-family:var(--round);font-size:.72rem;font-weight:800;padding:9px 5px;border-radius:11px;cursor:pointer;transition:all .2s;text-align:center;line-height:1.35;width:100%;border:2px solid rgba(61,236,168,.5);background:rgba(61,236,168,.12);color:#7AEFCC;" onmouseover="this.style.background='rgba(61,236,168,.25)';this.style.borderColor='#3DECA8';this.style.color='#3DECA8';this.style.transform='translateY(-2px)'" onmouseout="this.style.background='rgba(61,236,168,.12)';this.style.borderColor='rgba(61,236,168,.5)';this.style.color='#7AEFCC';this.style.transform=''">⚔️ 単元3<br>ギリシャ・ローマ<br>宗教の誕生</button>
-    <button onclick="hqStartQuiz(3)" style="font-family:var(--round);font-size:.72rem;font-weight:800;padding:9px 5px;border-radius:11px;cursor:pointer;transition:all .2s;text-align:center;line-height:1.35;width:100%;border:2px solid rgba(255,212,67,.5);background:rgba(255,212,67,.12);color:#FFE06A;" onmouseover="this.style.background='rgba(255,212,67,.25)';this.style.borderColor='#FFD443';this.style.color='#FFD443';this.style.transform='translateY(-2px)'" onmouseout="this.style.background='rgba(255,212,67,.12)';this.style.borderColor='rgba(255,212,67,.5)';this.style.color='#FFE06A';this.style.transform=''">🌾 単元4<br>縄文時代<br>弥生時代</button>
-    <button onclick="hqStartQuiz(4)" style="font-family:var(--round);font-size:.72rem;font-weight:800;padding:9px 5px;border-radius:11px;cursor:pointer;transition:all .2s;text-align:center;line-height:1.35;width:100%;border:2px solid rgba(255,85,119,.5);background:rgba(255,85,119,.12);color:#FF8FA8;" onmouseover="this.style.background='rgba(255,85,119,.25)';this.style.borderColor='#FF5577';this.style.color='#FF5577';this.style.transform='translateY(-2px)'" onmouseout="this.style.background='rgba(255,85,119,.12)';this.style.borderColor='rgba(255,85,119,.5)';this.style.color='#FF8FA8';this.style.transform=''">👸 単元5<br>邪馬台国<br>大和政権</button>
-    <button onclick="hqStartQuiz(5)" style="font-family:var(--round);font-size:.72rem;font-weight:800;padding:9px 5px;border-radius:11px;cursor:pointer;transition:all .2s;text-align:center;line-height:1.35;width:100%;border:2px solid rgba(168,120,255,.5);background:rgba(168,120,255,.12);color:#C8A0FF;" onmouseover="this.style.background='rgba(168,120,255,.25)';this.style.borderColor='#A878FF';this.style.color='#A878FF';this.style.transform='translateY(-2px)'" onmouseout="this.style.background='rgba(168,120,255,.12)';this.style.borderColor='rgba(168,120,255,.5)';this.style.color='#C8A0FF';this.style.transform=''">🏯 単元6<br>聖徳太子の政治<br>飛鳥文化</button>
-    <button onclick="hqStartQuiz(6)" style="font-family:var(--round);font-size:.72rem;font-weight:800;padding:9px 5px;border-radius:11px;cursor:pointer;transition:all .2s;text-align:center;line-height:1.35;width:100%;border:2px solid rgba(255,160,80,.5);background:rgba(255,160,80,.12);color:#FFB870;" onmouseover="this.style.background='rgba(255,160,80,.25)';this.style.borderColor='#FFA050';this.style.color='#FFA050';this.style.transform='translateY(-2px)'" onmouseout="this.style.background='rgba(255,160,80,.12)';this.style.borderColor='rgba(255,160,80,.5)';this.style.color='#FFB870';this.style.transform=''">⚔️ 単元7<br>大化の改新<br>律令国家</button>
-    <button onclick="hqStartQuiz(7)" style="font-family:var(--round);font-size:.72rem;font-weight:800;padding:9px 5px;border-radius:11px;cursor:pointer;transition:all .2s;text-align:center;line-height:1.35;width:100%;border:2px solid rgba(80,200,220,.5);background:rgba(80,200,220,.12);color:#80D8E8;" onmouseover="this.style.background='rgba(80,200,220,.25)';this.style.borderColor='#50C8DC';this.style.color='#50C8DC';this.style.transform='translateY(-2px)'" onmouseout="this.style.background='rgba(80,200,220,.12)';this.style.borderColor='rgba(80,200,220,.5)';this.style.color='#80D8E8';this.style.transform=''">🏛️ 単元8<br>奈良時代<br>平城京・天平文化</button>
-    <button onclick="hqStartQuiz(8)" style="font-family:var(--round);font-size:.72rem;font-weight:800;padding:9px 5px;border-radius:11px;cursor:pointer;transition:all .2s;text-align:center;line-height:1.35;width:100%;border:2px solid rgba(220,160,255,.5);background:rgba(220,160,255,.12);color:#E0B0FF;" onmouseover="this.style.background='rgba(220,160,255,.25)';this.style.borderColor='#DCA0FF';this.style.color='#DCA0FF';this.style.transform='translateY(-2px)'" onmouseout="this.style.background='rgba(220,160,255,.12)';this.style.borderColor='rgba(220,160,255,.5)';this.style.color='#E0B0FF';this.style.transform=''">🌸 単元9<br>平安時代<br>平安京・国風文化</button>
-    <button onclick="hqStartQuiz(9)" style="font-family:var(--round);font-size:.72rem;font-weight:800;padding:9px 5px;border-radius:11px;cursor:pointer;transition:all .2s;text-align:center;line-height:1.35;width:100%;border:2px solid rgba(255,140,60,.5);background:rgba(255,140,60,.12);color:#FFB07A;" onmouseover="this.style.background='rgba(255,140,60,.25)';this.style.borderColor='#FF8C3C';this.style.color='#FF8C3C';this.style.transform='translateY(-2px)'" onmouseout="this.style.background='rgba(255,140,60,.12)';this.style.borderColor='rgba(255,140,60,.5)';this.style.color='#FFB07A';this.style.transform=''">⚔️ 単元10<br>鎌倉時代<br>幕府成立・元寇・崩壊</button>
-    <button onclick="hqStartQuiz(10)" style="font-family:var(--round);font-size:.72rem;font-weight:800;padding:9px 5px;border-radius:11px;cursor:pointer;transition:all .2s;text-align:center;line-height:1.35;width:100%;border:2px solid rgba(100,200,120,.5);background:rgba(100,200,120,.12);color:#90D8A0;" onmouseover="this.style.background='rgba(100,200,120,.25)';this.style.borderColor='#64C878';this.style.color='#64C878';this.style.transform='translateY(-2px)'" onmouseout="this.style.background='rgba(100,200,120,.12)';this.style.borderColor='rgba(100,200,120,.5)';this.style.color='#90D8A0';this.style.transform=''">🏯 単元11<br>室町時代<br>幕府・南北朝・戦国</button>
-    <button onclick="hqStartQuiz(11)" style="font-family:var(--round);font-size:.72rem;font-weight:800;padding:9px 5px;border-radius:11px;cursor:pointer;transition:all .2s;text-align:center;line-height:1.35;width:100%;border:2px solid rgba(80,160,220,.5);background:rgba(80,160,220,.12);color:#90C8F0;" onmouseover="this.style.background='rgba(80,160,220,.25)';this.style.borderColor='#50A0DC';this.style.color='#50A0DC';this.style.transform='translateY(-2px)'" onmouseout="this.style.background='rgba(80,160,220,.12)';this.style.borderColor='rgba(80,160,220,.5)';this.style.color='#90C8F0';this.style.transform=''">🌍 単元12<br>中世ヨーロッパ・大航海<br>ルネサンス・鉄砲伝来</button>
-    <button onclick="hqStartQuiz(12)" style="font-family:var(--round);font-size:.72rem;font-weight:800;padding:9px 5px;border-radius:11px;cursor:pointer;transition:all .2s;text-align:center;line-height:1.35;width:100%;border:2px solid rgba(255,80,80,.5);background:rgba(255,80,80,.12);color:#FF9999;" onmouseover="this.style.background='rgba(255,80,80,.25)';this.style.borderColor='#FF5050';this.style.color='#FF5050';this.style.transform='translateY(-2px)'" onmouseout="this.style.background='rgba(255,80,80,.12)';this.style.borderColor='rgba(255,80,80,.5)';this.style.color='#FF9999';this.style.transform=''">🔥 単元13<br>安土桃山時代<br>信長・秀吉・桃山文化</button>
-    <button onclick="hqStartQuiz(13)" style="font-family:var(--round);font-size:.72rem;font-weight:800;padding:9px 5px;border-radius:11px;cursor:pointer;transition:all .2s;text-align:center;line-height:1.35;width:100%;border:2px solid rgba(160,200,255,.5);background:rgba(160,200,255,.12);color:#C0D8FF;" onmouseover="this.style.background='rgba(160,200,255,.25)';this.style.borderColor='#A0C8FF';this.style.color='#A0C8FF';this.style.transform='translateY(-2px)'" onmouseout="this.style.background='rgba(160,200,255,.12)';this.style.borderColor='rgba(160,200,255,.5)';this.style.color='#C0D8FF';this.style.transform=''">🏙️ 単元14<br>江戸時代<br>幕府成立・幕藩体制</button>
-    <button onclick="hqStartQuiz(14)" style="font-family:var(--round);font-size:.72rem;font-weight:800;padding:9px 5px;border-radius:11px;cursor:pointer;transition:all .2s;text-align:center;line-height:1.35;width:100%;border:2px solid rgba(255,200,80,.5);background:rgba(255,200,80,.12);color:#FFE090;" onmouseover="this.style.background='rgba(255,200,80,.25)';this.style.borderColor='#FFC850';this.style.color='#FFC850';this.style.transform='translateY(-2px)'" onmouseout="this.style.background='rgba(255,200,80,.12)';this.style.borderColor='rgba(255,200,80,.5)';this.style.color='#FFE090';this.style.transform=''">📜 単元15<br>江戸時代<br>改革・化政文化</button>
-  </div>
-  </div><!-- end inner wrapper -->
-</div>
+  <div id="hqMenuWrap">
+    <div id="hqMenuNav">
+      <button onclick="showScreen('titleScreen')" id="hqBackBtn">← トップへ戻る</button>
+      <div id="hqMenuTitle">📚 中学歴史クイズ</div>
+    </div>
+    <div id="hqMenuBody">
+      <div id="hqMenuHeading">
+        <div class="hqm-label">📚 高校受験対策</div>
+        <div class="hqm-title">中学歴史<br>クイズゲーム</div>
+        <div class="hqm-sub">JUNIOR HIGH HISTORY QUIZ</div>
+      </div>
+      <div id="hqMenuDesc">
+        各単元 <span class="hqm-em">三択問題 30問</span>に挑戦！　全問終了後に <span class="hqm-gold">🎁 高校受験超対策資料＋満点を取るコツ</span> をプレゼント！
+      </div>
+      <div id="hqMenuGrid"></div>
+    </div><!-- end hqMenuBody -->
+  </div><!-- end hqMenuWrap -->
+</div><!-- end hqTopScreen -->
 
 <!-- ======== 中学歴史クイズ QUIZ ======== -->
 <div class="screen hidden" id="hqQuizScreen" style="flex-direction:column;background:linear-gradient(145deg,#0A0A1A,#0E1628,#1A0A2E,#0E1628);overflow-y:auto;">
@@ -14173,7 +14207,7 @@ function hqPrintBonus() {
 
 <script>
 // ============================================================
-// スマホ仮想キーボード制御 v9-fix
+// スマホ仮想キーボード制御
 // ============================================================
 (function(){
   'use strict';
@@ -14189,14 +14223,9 @@ function hqPrintBonus() {
   var kbd = document.getElementById('mobileKbd');
   if (!kbd) return;
 
-  // ---- 状態 ----
-  var _userCollapsed = false; // ユーザーが手動で収納中か
-
-  // ---- タイピング対象スクリーン ----
+  var _userCollapsed = false;
   var TYPING_SCREENS = ['gameScreen','practiceScreen','kanjiScreen','eiScreen','quizScreen'];
-
-  // ---- クリア/モーダル系スクリーン（KBD非表示） ----
-  var MODAL_SCREENS = ['clearScreen','gameoverScreen','allClearScreen','homeConfirmScreen'];
+  var MODAL_IDS = ['clearScreen','gameoverScreen','allClearScreen','homeConfirmScreen'];
 
   function getActiveScreen() {
     var all = document.querySelectorAll('.screen');
@@ -14207,14 +14236,12 @@ function hqPrintBonus() {
   }
 
   function isModalVisible() {
-    for (var i = 0; i < MODAL_SCREENS.length; i++) {
-      var m = document.getElementById(MODAL_SCREENS[i]);
-      if (m && !m.classList.contains('hidden')) return true;
-    }
-    return false;
+    return MODAL_IDS.some(function(id){
+      var m = document.getElementById(id);
+      return m && !m.classList.contains('hidden');
+    });
   }
 
-  // KBDを表示すべき状態か（ユーザー収納・モーダル・非タイピング画面では false）
   function shouldShowKbd() {
     if (_userCollapsed) return false;
     if (isModalVisible()) return false;
@@ -14229,77 +14256,73 @@ function hqPrintBonus() {
     var panel = document.getElementById('typingPanel');
     var ground = document.getElementById('gameGround');
     var charWrap = document.getElementById('charWrap');
-    if (panel)   panel.style.bottom   = kbdH + 'px';
-    if (ground)  ground.style.bottom  = kbdH + 'px';
+    var isMobile = window.innerWidth <= 520;
+    if (panel)  panel.style.bottom  = kbdH + 'px';
+    if (ground) ground.style.bottom = kbdH + 'px';
     if (charWrap) {
       var panelH = panel ? panel.offsetHeight : 150;
+      var scale  = isMobile ? 0.55 : 1.0;
       charWrap.style.bottom = (panelH + kbdH + 8) + 'px';
+      charWrap.style.transform = 'scale(' + scale + ')';
+      charWrap.style.transformOrigin = 'bottom left';
     }
   }
 
-  // ---- KBD 表示 ----
+  // ---- KBD 表示 / 非表示 ----
   function showKbd() {
+    kbd.querySelectorAll('.mkbd-row').forEach(function(r){ r.style.display = ''; });
     kbd.style.display = 'flex';
-    requestAnimationFrame(function() {
+    requestAnimationFrame(function(){
       applyLayout(kbd.offsetHeight);
       updateNextHint();
     });
   }
 
-  // ---- KBD 非表示 ----
+  function showBarOnly() {
+    kbd.querySelectorAll('.mkbd-row').forEach(function(r){ r.style.display = 'none'; });
+    kbd.style.display = 'flex';
+    requestAnimationFrame(function(){
+      applyLayout(kbd.offsetHeight);
+    });
+  }
+
   function hideKbd() {
     kbd.style.display = 'none';
     applyLayout(0);
     if (typeof _updateCharBottom === 'function') setTimeout(_updateCharBottom, 30);
   }
 
-  // ---- 収納バー表示（キーなし） ----
-  function showCollapseBarOnly() {
-    // キー行を隠してバーだけ flex で表示
-    kbd.querySelectorAll('.mkbd-row').forEach(function(r){ r.style.display='none'; });
-    kbd.style.display = 'flex';
-    requestAnimationFrame(function() {
-      applyLayout(kbd.offsetHeight); // バーだけの高さ
-      if (typeof _updateCharBottom === 'function') setTimeout(_updateCharBottom, 30);
-    });
-  }
+  // ---- 状態同期（ポーリングの核心） ----
+  var _prevState = null;
 
-  function restoreKbdRows() {
-    kbd.querySelectorAll('.mkbd-row').forEach(function(r){ r.style.display=''; });
-  }
-
-  // ---- 状態に応じて表示を同期 ----
   function syncKbd() {
+    var need;
     if (_userCollapsed) {
-      // バーだけ表示（タイピング画面のみ）
-      var sc = getActiveScreen();
-      var inTyping = sc && TYPING_SCREENS.indexOf(sc) >= 0 && !isModalVisible();
-      if (inTyping) {
-        showCollapseBarOnly();
-      } else {
-        hideKbd();
-      }
-    } else if (shouldShowKbd()) {
-      restoreKbdRows();
-      showKbd();
+      var sc0 = getActiveScreen();
+      need = (sc0 && TYPING_SCREENS.indexOf(sc0) >= 0 && !isModalVisible()) ? 'bar' : 'hide';
     } else {
-      hideKbd();
+      need = shouldShowKbd() ? 'show' : 'hide';
     }
+    if (need === _prevState) return;
+    _prevState = need;
+    if (need === 'show') showKbd();
+    else if (need === 'bar') showBarOnly();
+    else hideKbd();
   }
 
   // ---- 収納ボタン ----
   var collapseBtn = document.getElementById('mkbdCollapseBtn');
   if (collapseBtn) {
     collapseBtn.addEventListener('touchstart', function(e) {
-      e.preventDefault();
-      e.stopPropagation();
+      e.preventDefault(); e.stopPropagation();
       _userCollapsed = !_userCollapsed;
       collapseBtn.textContent = _userCollapsed ? '▲ キーボードを表示' : '▼ キーボードを隠す';
+      _prevState = null; // 強制再描画
       syncKbd();
     }, { passive: false });
   }
 
-  // ---- showScreen フック（画面切替時に収納リセット） ----
+  // ---- showScreen フック（画面切替で収納リセット） ----
   var _hookSI = setInterval(function(){
     if (typeof showScreen === 'function') {
       clearInterval(_hookSI);
@@ -14308,8 +14331,8 @@ function hqPrintBonus() {
         _orig(id);
         _userCollapsed = false;
         if (collapseBtn) collapseBtn.textContent = '▼ キーボードを隠す';
-        restoreKbdRows();
-        setTimeout(syncKbd, 60);
+        _prevState = null; // 強制再描画
+        setTimeout(syncKbd, 80);
       };
     }
   }, 80);
@@ -14349,51 +14372,36 @@ function hqPrintBonus() {
   }
 
   // ---- キー送信 ----
+  function makeEvt(key) {
+    var code = key===' '?'Space':key==='Backspace'?'Backspace':'Key'+key.toUpperCase();
+    return new KeyboardEvent('keydown',{key:key,code:code,bubbles:true,cancelable:true});
+  }
+
   function sendKey(k) {
     var sc = getActiveScreen();
-
-    // KeyboardEvent生成ヘルパー（スペース・BSを正しく処理）
-    function makeEvt(key) {
-      var code = key === ' ' ? 'Space'
-               : key === 'Backspace' ? 'Backspace'
-               : 'Key' + key.toUpperCase();
-      return new KeyboardEvent('keydown', {key:key, code:code, bubbles:true, cancelable:true});
-    }
-
     if (sc === 'gameScreen') {
-      if (k === 'BS') { if (typeof _romaBuf !== 'undefined') window._romaBuf = ''; return; }
-      document.dispatchEvent(makeEvt(k === 'BS' ? 'Backspace' : k));
-
+      if (k==='BS'){if(typeof _romaBuf!=='undefined')window._romaBuf='';return;}
+      document.dispatchEvent(makeEvt(k));
     } else if (sc === 'practiceScreen') {
-      if (k === 'BS') return;
-      // onPracticeKey は e.key==='Space' を ' ' に変換するので 'Space' を渡す
-      if (typeof onPracticeKey === 'function')
-        onPracticeKey({key: k === ' ' ? 'Space' : k, preventDefault:function(){}, stopPropagation:function(){}});
-
+      if (k==='BS')return;
+      if (typeof onPracticeKey==='function')
+        onPracticeKey({key:k===' '?'Space':k,preventDefault:function(){},stopPropagation:function(){}});
     } else if (sc === 'quizScreen') {
-      // タイピングフェーズ：_processTypingChar を直接呼ぶ
-      if (typeof Q !== 'undefined' && Q.phase === 'typing' && typeof _processTypingChar === 'function') {
-        var word = Q.pool && Q.pool[Q.idx];
-        if (word) {
-          _processTypingChar(k === 'BS' ? 'Backspace' : k, word.en, word, null);
-          setTimeout(function(){ syncKbd(); updateNextHint(); }, 50);
-          return;
-        }
+      if (typeof Q!=='undefined'&&Q.phase==='typing'&&typeof _processTypingChar==='function') {
+        var word=Q.pool&&Q.pool[Q.idx];
+        if(word){_processTypingChar(k==='BS'?'Backspace':k,word.en,word,null);
+          _prevState=null; setTimeout(syncKbd,50); setTimeout(updateNextHint,50); return;}
       }
-      // 選択フェーズ等：document へdispatch
-      document.dispatchEvent(makeEvt(k === 'BS' ? 'Backspace' : k));
-
+      document.dispatchEvent(makeEvt(k==='BS'?'Backspace':k));
     } else if (sc === 'kanjiScreen') {
-      document.dispatchEvent(makeEvt(k === 'BS' ? 'Backspace' : k));
-
+      document.dispatchEvent(makeEvt(k==='BS'?'Backspace':k));
     } else if (sc === 'eiScreen') {
-      if (typeof handleEiKey === 'function')
-        handleEiKey({key: k === 'BS' ? 'Backspace' : k, preventDefault:function(){}});
+      if(typeof handleEiKey==='function')handleEiKey({key:k==='BS'?'Backspace':k,preventDefault:function(){}});
     }
     setTimeout(updateNextHint, 50);
   }
 
-  // ---- inputへのOSキーボードをブロック ----
+  // ---- inputのOSキーボードをブロック ----
   function lockInput(id) {
     var inp = document.getElementById(id);
     if (!inp) return;
@@ -14413,7 +14421,7 @@ function hqPrintBonus() {
       setTimeout(function(){
         var inp=document.getElementById('quizTypingInput');
         if(inp)inp.blur();
-        syncKbd(); updateNextHint();
+        _prevState=null; syncKbd(); updateNextHint();
       },40);
     };
     return true;
@@ -14433,7 +14441,7 @@ function hqPrintBonus() {
     kbd.querySelectorAll('.mkbd-pressed').forEach(function(el){el.classList.remove('mkbd-pressed');});
   }, { passive: false });
 
-  // ---- フック初期化 ----
+  // ---- フック ----
   var _done={ptc:false,ei:false,sc2:false};
   var _hookAll=setInterval(function(){
     if(!_done.ptc&&typeof processTypedChar==='function'){
@@ -14448,25 +14456,22 @@ function hqPrintBonus() {
     if(_done.ptc&&_done.ei&&_done.sc2) clearInterval(_hookAll);
   },100);
 
-  window.addEventListener('load',function(){
-    lockInput('practiceInput');
-    lockInput('quizTypingInput');
-    lockInput('kanjiTypingInput');
-    // 初期状態：KBDは非表示（display:noneのまま）
-    kbd.style.display = 'none';
-    setTimeout(syncKbd, 300);
-  });
+  // ---- 初期化 ----
+  lockInput('practiceInput');
+  lockInput('quizTypingInput');
+  lockInput('kanjiTypingInput');
 
-  // 500ms ポーリング
+  // ---- ポーリング（200ms） ----
   setInterval(function(){
     syncKbd();
     if (kbd.style.display !== 'none') updateNextHint();
-  }, 500);
+  }, 200);
 
 })();
 </script>
 
 </body>
 </html>
+
 
 
