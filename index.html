@@ -847,7 +847,21 @@ body { cursor: none; }
   .friendDiv {
     bottom: auto !important;
     top: auto !important;
-    transition: none !important; /* JSが直接制御するためtransitionを切る */
+    transition: none !important;
+  }
+  /* フレンドの吹き出しをコンパクトに */
+  .friendSpeech {
+    font-size: 0.68rem !important;
+    padding: 6px 9px !important;
+    max-width: 130px !important;
+    line-height: 1.4 !important;
+  }
+  /* キャリーの吹き出しをスマホ対応 */
+  #speech {
+    font-size: .82rem !important;
+    padding: 8px 14px !important;
+    white-space: normal !important;
+    border-radius: 16px !important;
   }
 }
 .friendDiv canvas {
@@ -4544,44 +4558,35 @@ function showSpeech(msg) {
   const el = document.getElementById('speech');
   el.textContent = '🐹「'+msg+'」';
 
-  // タイピングパネル上端を取得
   const panel    = document.getElementById('typingPanel');
-  const panelTop = panel ? panel.getBoundingClientRect().top : window.innerHeight * 0.65;
-  const charH    = 144; // charCanvasの高さ
-
-  // スマホ判定（HUDが2段になって高さが変わるため）
   const isMobile = window.innerWidth <= 520;
+  const panelH   = panel ? panel.offsetHeight : 150;
+  const panelBot = parseInt(panel ? panel.style.bottom : '0') || 0;
+  const totalBot = panelH + panelBot; // 画面下端からパネル上端まで
 
-  // 吹き出しをパネルの上、かつキャラの頭より上に配置
-  // bottomはウィンドウ下端からの距離
-  const panelHeight = panel ? panel.offsetHeight : 150;
-  const hudHeight   = document.getElementById('hud') ? document.getElementById('hud').offsetHeight : 56;
+  // キャリーの実際の頭頂位置（スマホはscale0.55）
+  const charScale  = isMobile ? 0.55 : 1.0;
+  const charH      = Math.round(144 * charScale);
+  const groundH    = isMobile ? 70 : 110;
+  const charTopFromBottom = totalBot + charH + groundH * charScale + 12;
 
-  // キャラの底辺はground(110px)の上なので bottom=110px
-  // キャラ頭頂 = bottom:110 + charH:144 = 254pxあたり
-  // 吹き出しはキャラ頭頂より上に出す
-  const charBottom  = 110; // ground height
-  const charTopFromBottom = charBottom + charH + 20; // キャラ頭より20px上
-
-  // パネル上端からの余裕を取って、吹き出しがパネルに被らないように
-  const safeBottom = Math.max(charTopFromBottom, panelHeight + 20);
+  // 吹き出しをパネル上端より上に
+  const safeBottom = Math.max(charTopFromBottom, totalBot + 20);
   el.style.bottom = safeBottom + 'px';
   el.style.top    = '';
 
-  // 水平位置：スマホでは画面幅が狭いのでキャラ位置に関わらず左端から出す
   if (isMobile) {
-    el.style.left = '8px';
+    el.style.left     = '8px';
     el.style.maxWidth = (window.innerWidth - 16) + 'px';
   } else {
-    const bubbleW  = Math.min(el.scrollWidth || 300, 340);
-    const leftPos  = Math.max(8, G.charX - bubbleW + 40);
-    el.style.left  = leftPos + 'px';
+    const bubbleW = Math.min(el.scrollWidth || 300, 340);
+    el.style.left     = Math.max(8, G.charX - bubbleW + 40) + 'px';
     el.style.maxWidth = '340px';
   }
 
   el.classList.add('show');
   clearTimeout(el._hideTimer);
-  el._hideTimer = setTimeout(()=>el.classList.remove('show'), 6000);
+  el._hideTimer = setTimeout(() => el.classList.remove('show'), 6000);
 }
 
 // ============================================================
@@ -4609,9 +4614,6 @@ function _returnFriendHome(friendId) {
 }
 
 function showFriendSpeech(friendId, msg) {
-  // スマホでは画面が狭いのでフレンドのセリフは非表示
-  if (window.innerWidth <= 520) return;
-
   // 前のキャラが発話中なら先に戻す
   if (_currentFriend && _currentFriend !== friendId) {
     clearTimeout(FRIEND_SPEECH_TIMERS[_currentFriend]);
@@ -4627,14 +4629,28 @@ function showFriendSpeech(friendId, msg) {
   clearTimeout(FRIEND_SPEECH_TIMERS[friendId]);
   clearTimeout(FRIEND_APPEAR_TIMERS[friendId]);
 
-  // キャリーの右隣に配置（スプライト幅102px + 余白12px）
-  const carryRight = G.charX + 102 + 12;
-  const targetLeft = Math.min(carryRight, window.innerWidth - 130);
-  const _panel = document.getElementById('typingPanel');
-  const _ph = _panel ? _panel.offsetHeight : 120;
-  wrap.style.bottom    = (_ph + 8) + 'px';
-  wrap.style.left      = targetLeft + 'px';
-  wrap.style.transform = 'scale(1.0)';
+  const isMobile   = window.innerWidth <= 520;
+  const _panel     = document.getElementById('typingPanel');
+  const _ph        = _panel ? _panel.offsetHeight : 120;
+  const _panelBot  = parseInt(_panel ? _panel.style.bottom : '0') || 0;
+  const _totalBot  = _ph + _panelBot;
+  const friendScale = isMobile ? 0.45 : 0.75;
+
+  if (isMobile) {
+    // スマホ：パネル上端のすぐ上・右端に小さく表示
+    wrap.style.bottom        = (_totalBot + 8) + 'px';
+    wrap.style.left          = _getFriendHomeLeft(friendId) + 'px';
+    wrap.style.transform     = `scale(${friendScale * 1.2})`; // 少し大きく
+    wrap.style.transformOrigin = 'bottom left';
+  } else {
+    // PC：キャリーの右隣に配置
+    const carryRight = G.charX + 102 + 12;
+    const targetLeft = Math.min(carryRight, window.innerWidth - 130);
+    wrap.style.bottom    = (_totalBot + 8) + 'px';
+    wrap.style.left      = targetLeft + 'px';
+    wrap.style.transform = 'scale(1.0)';
+  }
+
   wrap.classList.add('speaking');
   sfxFriendAppear();
   exciteFriend(friendId);
@@ -14472,6 +14488,7 @@ function hqPrintBonus() {
 
 </body>
 </html>
+
 
 
 
